@@ -1,30 +1,40 @@
-const dropzone = document.getElementById('dropzone');
-const fileInput = document.getElementById('fileInput');
+const dropzone1 = document.getElementById('dropzone1');
+const dropzone2 = document.getElementById('dropzone2');
+const fileInput1 = document.getElementById('fileInput1');
+const fileInput2 = document.getElementById('fileInput2');
+
 let files = [];
 let lastResults = [];
 
 const camposExtras = ["PS", "Cupones", "Pagos", "Cobranzas", "TC", "CPD", "Opera a Crédito", "Acuerdo", "Cuenta MS"];
 
-dropzone.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  dropzone.style.backgroundColor = '#f0f0f0';
-});
+function setupDropzone(dropzone, fileInput, index) {
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.style.backgroundColor = '#f0f0f0';
+  });
 
-dropzone.addEventListener('dragleave', () => {
-  dropzone.style.backgroundColor = '';
-});
+  dropzone.addEventListener('dragleave', () => {
+    dropzone.style.backgroundColor = '';
+  });
 
-dropzone.addEventListener('drop', (e) => {
-  e.preventDefault();
-  dropzone.style.backgroundColor = '';
-  files = Array.from(e.dataTransfer.files);
-  processFiles(files);
-});
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.style.backgroundColor = '';
+    files[index] = e.dataTransfer.files[0];
+    if(files.length == 2){
+      processFiles(files);
+    }
+  });
 
-fileInput.addEventListener('change', (e) => {
-  files = Array.from(e.target.files);
-  processFiles(files);
-});
+  fileInput.addEventListener('change', (e) => {
+    files[index] = e.target.files[0];
+    processFiles(files);
+  });
+}
+
+setupDropzone(dropzone1, fileInput1, 0);
+setupDropzone(dropzone2, fileInput2, 1);
 
 function readExcel(file) {
   return new Promise((resolve) => {
@@ -40,10 +50,6 @@ function readExcel(file) {
 }
 
 async function processFiles(files) {
-  if (files.length < 2) {
-    alert('Por favor sube dos archivos.');
-    return;
-  }
 
   const [lastCrossFile, newCrossFile] = files;
   const lastCrossRaw = await readExcel(lastCrossFile);

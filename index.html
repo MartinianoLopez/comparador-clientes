@@ -5,32 +5,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Comparación de Clientes</title>
   <style>
-    body { font-family: sans-serif; margin: 2em; }
-    table { border-collapse: collapse; margin-top: 1em; }
-    th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
-    .dropzone {
-      border: 2px dashed #aaa;
-      padding: 2em;
-      text-align: center;
-      color: #666;
-      margin-bottom: 1em;
-    }
+   body { font-family: sans-serif; margin: 2em; }
+table { border-collapse: collapse; margin-top: 1em; }
+th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
+
+.container {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap; 
+  justify-content: center; 
+}
+
+.block {
+  flex: 1 1 300px; 
+  margin: 40px;
+  min-width: 200px;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.dropzone {
+  width: 100%;
+  padding: 40px;
+  border: 2px dashed #ccc;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 10px;
+}
+
+input[type="file"] {
+  width: 100%;
+}
+
   </style>
 </head>
 <body>
   <h1>Comparación de Archivos Excel</h1>
-
-  <div class="dropzone" id="dropzone">
-    Arrastra dos archivos Excel aquí (.xlsx)
+  <div class="container">
+    <div class="block">
+      <div class="dropzone" id="dropzone1">
+        Arrastra el primer archivo Excel aquí (.xlsx)
+      </div>
+      <input type="file" id="fileInput1" accept=".xlsx" />
+    </div>
+    <div class="block">
+      <div class="dropzone" id="dropzone2">
+        Arrastra el segundo archivo Excel aquí (.xlsx)
+      </div>
+      <input type="file" id="fileInput2" accept=".xlsx" />
+    </div>
   </div>
-
-  <input type="file" id="fileInput" multiple accept=".xlsx" />
-  <button onclick="exportToExcel()">Descargar Excel</button>
+  <button onclick="exportToExcel()">Descargar comparacion en Excel</button>
   <div id="output"></div>
 
-  <!-- SheetJS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <!-- Tu script -->
   <script src="index.js"></script>
 </body>
 </html>
