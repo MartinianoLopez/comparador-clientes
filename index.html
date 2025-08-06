@@ -40,6 +40,104 @@ th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
 input[type="file"] {
   width: 100%;
 }
+.table-wrapper {
+  max-height: 100vh;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+}
+
+.comparison-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.comparison-table th,
+.comparison-table td {
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  text-align: center;
+}
+
+.comparison-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+
+/* Fijar columnas de la izquierda */
+.sticky-col-0 {
+  position: sticky;
+  left: 0;
+  background-color: #ffffff;
+  z-index: 2;
+}
+
+.sticky-col-1 {
+  position: sticky;
+  background-color: #ffffff;
+  z-index: 2;
+}
+
+.sticky-col-2 {
+  position: sticky;
+  background-color: #ffffff;
+  z-index: 2;
+}
+
+/* Asegura que thead tenga z-index mayor */
+.comparison-table thead .sticky-col-0,
+.comparison-table thead .sticky-col-1,
+.comparison-table thead .sticky-col-2 {
+  z-index: 4;
+}
+
+/* Colores de grupo */
+.group-ics {
+  background-color: #D6EAF8; /* Azul institucional */
+}
+
+.group-extra-0 {
+  background-color: #FADBD8; /* Rojo claro elegante */
+}
+
+.group-extra-1 {
+  background-color: #D5F5E3; /* Verde claro corporativo */
+}
+
+.group-extra-2 {
+  background-color: #FCF3CF; /* Amarillo sobrio */
+}
+
+.group-extra-3 {
+  background-color: #EBDEF0; /* Violeta suave */
+}
+
+.group-extra-4 {
+  background-color: #FDEBD0; /* Naranja pastel profesional */
+}
+
+.group-extra-5 {
+  background-color: #D1F2EB; /* Verde agua institucional */
+}
+
+.group-extra-6 {
+  background-color: #F9E79F; /* Mostaza suave */
+}
+
+.group-extra-7 {
+  background-color: #D2B4DE; /* Lavanda pastel fuerte */
+}
+
+.group-extra-8 {
+  background-color: #A9CCE3; /* Azul medio serio */
+}
+
+.group-extra-9 {
+  background-color: #F6DDCC; /* Terracota claro */
+}
+
+
 
   </style>
 </head>

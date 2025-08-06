@@ -86,7 +86,7 @@ async function processFiles(files) {
     else if (last.ICS_BE_last != null && current.ICS_BE_new == null) cambio = "Cuenta eliminada";
     else if (diferencia > 0) cambio = "Aumentó";
     else if (diferencia < 0) cambio = "Disminuyó";
-    else cambio = "Igual";
+    else cambio = "Sin cambios";
 
     const extras = {};
     camposExtras.forEach(campo => {
@@ -114,21 +114,20 @@ async function processFiles(files) {
 
   const resumen = {};
   let totalNeto = 0;
-
+  let totalNetoDeCuentas = newCrossData.length;
   crossComparison.forEach(r => {
     totalNeto += r.Diferencia;
     if (!resumen[r.Cambio]) {
-      resumen[r.Cambio] = { Cantidad: 0, Total_Diferencia: 0 };
+      resumen[r.Cambio] = { Cantidad: 0, Total_Diferencia: 0 }; 
     }
     resumen[r.Cambio].Cantidad += 1;
     resumen[r.Cambio].Total_Diferencia += r.Diferencia;
   });
-
   crossComparison.sort((a, b) => {
     const order = {
       'Disminuyó': 0,
       'Aumentó': 1,
-      'Igual': 2,
+      'Sin cambios': 2,
       'Cuenta nueva': 3,
       'Cuenta eliminada': 4
     };
@@ -136,32 +135,58 @@ async function processFiles(files) {
     const bOrder = order[b.Cambio] ?? 5;
     return aOrder - bOrder;
   });
+const cuentasPequenasEmpresas = newCrossData.filter(row => row.Segmento_new === 'Pequeñas Empresas').length;
+console.log(cuentasPequenasEmpresas);
+const cuentasNegociosProfesionales = newCrossData.filter(row => row.Segmento_new === 'Negocios Y Profesionales').length;
+console.log(cuentasNegociosProfesionales);
+console.log(newCrossData.map(r => r.Segmento_new));
 
-  showResults(crossComparison, resumen, totalNeto);
+  showResults(crossComparison, resumen, totalNeto, totalNetoDeCuentas, cuentasPequenasEmpresas, cuentasNegociosProfesionales);
+
   lastResults = crossComparison; // Para exportar después
 
 }
 
-function showResults(crossComparison, resumen, totalNeto) {
+function showResults(
+  crossComparison,
+  resumen,
+  totalNeto,
+  totalNetoDeCuentas,
+  cuentasPequenasEmpresas,
+  cuentasNegociosProfesionales
+) {
   const output = document.getElementById('output');
   output.innerHTML = '';
 
-  const table = document.createElement('table');
-  const header = `<tr>
-    <th>numero</th><th>Nombre</th><th>Segmento</th><th>ICS anterior</th>
-    <th>cambio</th><th>ICS nuevo</th>
-    ${camposExtras.map(c => `<th>${c} anterior</th><th>Cambio</th><th>${c} nuevo</th>`).join('')}
-  </tr>`;
+  const tableWrapper = document.createElement('div');
+  tableWrapper.className = 'table-wrapper';
 
-  table.innerHTML = header + crossComparison.map(row => {
-    const extrasHtml = camposExtras.map(campo => {
+  const table = document.createElement('table');
+  table.className = 'comparison-table';
+
+  const header = `<thead><tr>
+  <th class="sticky-col-0">Código</th>
+  <th class="sticky-col-1">Nombre</th>
+  <th class="sticky-col-2">Segmento</th>
+  <th class="group-ics">ICS anterior</th>
+  <th class="group-ics">Cambio</th>
+  <th class="group-ics">ICS nuevo</th>
+  ${camposExtras.map((c, i) => `
+    <th class="group-extra-${i}">${c} anterior </th>
+    <th class="group-extra-${i}">Cambio</th>
+    <th class="group-extra-${i}">${c} nuevo</th>
+  `).join('')}
+</tr></thead>`;
+
+  const body = `<tbody>${crossComparison.map(row => {
+    const extrasHtml = camposExtras.map((campo, i) => {
       const data = row.extras[campo];
       return `
-        <td>${data.last}</td>
-        <td style="background-color: ${data.diff > 0 ? '#4CAF50' : data.diff < 0 ? '#f44336' : 'transparent'}; color: ${data.diff !== 0 ? 'white' : 'black'}; font-weight: bold; text-align: center;">
+        <td class="group-extra-${i}">${data.last}</td>
+        <td class="group-extra-${i}" style="background-color: ${data.diff > 0 ? '#4CAF50' : data.diff < 0 ? '#f44336' : 'transparent'}; color: ${data.diff !== 0 ? 'white' : 'black'}; font-weight: bold; text-align: center;">
           ${data.diff > 0 ? '+' + data.diff : data.diff < 0 ? data.diff : '0'}
         </td>
-        <td>${data.new}</td>
+        <td class="group-extra-${i}">${data.new}</td>
       `;
     }).join('');
 
@@ -170,25 +195,26 @@ function showResults(crossComparison, resumen, totalNeto) {
         <td>${row.Codigo_Cliente}</td>
         <td>${row.Nombre}</td>
         <td>${row.Segmento}</td>
-        <td>${row.ICS_BE_last}</td>
-        <td style="
+        <td class="group-ics">${row.ICS_BE_last}</td>
+        <td class="group-ics" style="
           background-color: ${(row.Cambio === 'Aumentó' ? '#4CAF50' : row.Cambio === 'Disminuyó' ? '#f44336' : 'transparent')};
           color: ${(row.Cambio === 'Aumentó' || row.Cambio === 'Disminuyó') ? 'white' : 'black'};
           font-weight: bold;
-          text-align: center;
-        ">
+          text-align: center;">
           ${row.Cambio === 'Aumentó' ? '+' + row.Diferencia : row.Cambio === 'Disminuyó' ? row.Diferencia : row.Cambio}
         </td>
-        <td>${row.ICS_BE_new}</td>
+        <td class="group-ics">${row.ICS_BE_new}</td>
         ${extrasHtml}
       </tr>
     `;
-  }).join('');
+  }).join('')}</tbody>`;
 
-  output.appendChild(table);
+  table.innerHTML = header + body;
+  tableWrapper.appendChild(table);
+  output.appendChild(tableWrapper);
 
   const resumenTable = document.createElement('table');
-  resumenTable.innerHTML = `<tr><th>Cambio</th><th>Cantidad</th><th>Total Diferencia</th></tr>` +
+  resumenTable.innerHTML = `<tr><th>Cambio</th><th>Cuentas</th><th>Productos</th></tr>` +
     Object.entries(resumen).map(([cambio, info]) => `
       <tr><td>${cambio}</td><td>${info.Cantidad}</td><td>${info.Total_Diferencia}</td></tr>
     `).join('');
@@ -196,14 +222,36 @@ function showResults(crossComparison, resumen, totalNeto) {
   output.appendChild(resumenTable);
 
   const neto = document.createElement('p');
-  neto.innerHTML = `<strong>Total Neto:</strong> ${totalNeto}`;
+  const netoCuentas = document.createElement('p');
+  neto.innerHTML = `<strong>Cambio del total de productos activos:</strong> ${totalNeto}`;
+  netoCuentas.innerHTML = `<strong>Numero total de cuentas activas:</strong> ${totalNetoDeCuentas}`;
   output.appendChild(neto);
+  output.appendChild(netoCuentas);
+  const netoPequenas = document.createElement('p');
+netoPequenas.innerHTML = `<strong>Cuentas activas de Pequeñas Empresas:</strong> ${cuentasPequenasEmpresas}`;
+output.appendChild(netoPequenas);
+
+const netoNegocios = document.createElement('p');
+netoNegocios.innerHTML = `<strong>Cuentas activas de Negocios y Profesionales:</strong> ${cuentasNegociosProfesionales}`;
+output.appendChild(netoNegocios);
+
 }
+
 function exportToExcel() {
-  const headers = [
-    "Codigo_Cliente", "Nombre", "Segmento", "ICS_BE_last", "Diferencia", "ICS_BE_new",
-    ...camposExtras.flatMap(c => [`${c}_last`, `${c}_diff`, `${c}_new`])
-  ];
+  const header = `<thead><tr>
+  <th class="sticky-col-0">Código</th>
+  <th class="sticky-col-1">Nombre</th>
+  <th class="sticky-col-2">Segmento</th>
+  <th class="group-ics">ICS anterior</th>
+  <th class="group-ics">Cambio</th>
+  <th class="group-ics">ICS nuevo</th>
+  ${camposExtras.map((c, i) => `
+    <th class="group-extra-${i}">${c} anterior</th>
+    <th class="group-extra-${i}">Cambio</th>
+    <th class="group-extra-${i}">${c} nuevo</th>
+  `).join('')}
+</tr></thead>`;
+
 
   const rows = lastResults.map(row => {
     const data = {
